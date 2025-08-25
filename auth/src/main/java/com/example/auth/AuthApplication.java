@@ -30,9 +30,11 @@ public class AuthApplication {
                 .with(authorizationServer(), as -> as.oidc(Customizer.withDefaults()))
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults())
-                .webAuthn(w -> w.allowedOrigins("http://localhost:8080")
-                        .rpId("localhost")
-                        .rpName("Bootiful"))
+                .webAuthn(w -> w
+                    .allowedOrigins("http://localhost:8080")
+                    .rpId("localhost")
+                    .rpName("Bootiful")
+                )
                 .authorizeHttpRequests(a -> a.anyRequest().authenticated())
                 .oneTimeTokenLogin(ott -> ott.tokenGenerationSuccessHandler((OneTimeTokenGenerationSuccessHandler) (request, response, oneTimeToken) -> {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE);

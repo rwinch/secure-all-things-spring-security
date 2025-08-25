@@ -39,8 +39,7 @@ public class ClientApplication {
 //    }
 //
     @Bean
-    OAuth2RestClientHttpServiceGroupConfigurer securityConfigurer(
-            OAuth2AuthorizedClientManager manager) {
+    OAuth2RestClientHttpServiceGroupConfigurer securityConfigurer(OAuth2AuthorizedClientManager manager) {
         return OAuth2RestClientHttpServiceGroupConfigurer.from(manager);
     }
 }
@@ -75,7 +74,7 @@ class ClientController {
         this.dogsClient = dogsClient;
     }
 
-    @GetMapping("/me")
+    @GetMapping("/api/me")
     Me me() {
         return this.dogsClient.me();
      /*   return this.http
@@ -88,7 +87,7 @@ class ClientController {
 
     }
 
-    @GetMapping("/dogs")
+    @GetMapping("/api/dogs")
     Collection<Dog> dogs() {
         return this.dogsClient.dogs();
 
