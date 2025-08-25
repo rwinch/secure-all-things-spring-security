@@ -12,11 +12,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.service.annotation.GetExchange;
 import org.springframework.web.service.registry.HttpServiceClient;
 
+import java.security.Principal;
 import java.util.Collection;
-import java.util.Map;
-import java.util.function.Consumer;
-
-import static org.springframework.security.oauth2.client.web.client.RequestAttributeClientRegistrationIdResolver.clientRegistrationId;
 
 @SpringBootApplication
 public class ClientApplication {
@@ -25,83 +22,69 @@ public class ClientApplication {
         SpringApplication.run(ClientApplication.class, args);
     }
 
+ /*   @Bean
+    RestClient restClient(OAuth2AuthorizedClientManager auth2AuthorizedClientManager,
+                          RestClient.Builder builder) {
+        return builder
+                .requestInterceptor(new OAuth2ClientHttpRequestInterceptor(auth2AuthorizedClientManager))
+                .build();
+    }*/
 
-    //
-//    @Bean
-//    RestClient restClient(
-//            RestClient.Builder builder,
-//            OAuth2AuthorizedClientManager oAuth2AuthorizedClientManager
-//    ) {
-//        var ochri = new OAuth2ClientHttpRequestInterceptor(oAuth2AuthorizedClientManager);
-//        return builder
-//                .requestInterceptor(ochri)
-//                .build();
-//    }
-//
     @Bean
-    OAuth2RestClientHttpServiceGroupConfigurer securityConfigurer(OAuth2AuthorizedClientManager manager) {
-        return OAuth2RestClientHttpServiceGroupConfigurer.from(manager);
+    OAuth2RestClientHttpServiceGroupConfigurer restClientHttpServiceGroupConfigurer(
+            OAuth2AuthorizedClientManager auth2AuthorizedClientManager) {
+        return OAuth2RestClientHttpServiceGroupConfigurer.from(auth2AuthorizedClientManager);
     }
 }
 
-record Me(String name) {
+record Dog(int id, String owner, String name, String description) {
+}
+
+@Controller
+@ResponseBody
+class DogsClientController {
+
+    private final DogsClient dogsClient;
+
+    DogsClientController(DogsClient dogsClient) {
+        this.dogsClient = dogsClient;
+    }
+
+    @GetMapping("/dogs-client")
+    Collection<Dog> dogs(Principal principal) {
+        System.out.println("looking up dogs for username [" + principal.getName() + ']');
+        return dogsClient.dogs();
+    }
+
 }
 
 @HttpServiceClient
 interface DogsClient {
 
     @ClientRegistrationId("spring")
-    @GetExchange("http://localhost:8081/me")
-    Me me();
-
-    @ClientRegistrationId("spring")
     @GetExchange("http://localhost:8081/dogs")
     Collection<Dog> dogs();
 }
 
-@Controller
-@ResponseBody
-class ClientController {
+/*
+@Component
+class DogsClient {
 
-//    private final RestClient http;
+    private final RestClient restClient;
 
-    private final Consumer<Map<String, Object>> spring = clientRegistrationId("spring");
-
-    private final DogsClient dogsClient;
-
-    ClientController(/*RestClient http,*/ DogsClient dogsClient) {
-//        this.http = http;
-        this.dogsClient = dogsClient;
+    DogsClient(RestClient restClient) {
+        this.restClient = restClient;
     }
 
-    @GetMapping("/api/me")
-    Me me() {
-        return this.dogsClient.me();
-     /*   return this.http
-                .get()
-                .uri("http://localhost:8081/me")
-                .attributes(this.spring)
-                .retrieve()
-                .body(String.class);*/
-
-
-    }
-
-    @GetMapping("/api/dogs")
     Collection<Dog> dogs() {
-        return this.dogsClient.dogs();
-
-        /*this.http
-                .get()//
-                .uri("http://localhost:8081/dogs")//
-                .attributes(this.spring) //
-                .retrieve() //
+        return this.restClient
+                .get()
+                .uri("http://localhost:8081/dogs")
+                .attributes(clientRegistrationId("spring"))
+                .retrieve()
                 .body(new ParameterizedTypeReference<Collection<Dog>>() {
-                });*/
+                });
     }
-
-
 }
 
-record Dog(int id, String name, String owner, String description) {
-}
+ */

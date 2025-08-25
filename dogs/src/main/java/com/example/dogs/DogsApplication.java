@@ -10,25 +10,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.security.Principal;
 import java.util.Collection;
-import java.util.Map;
 
 @SpringBootApplication
 public class DogsApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(DogsApplication.class, args);
-    }
-
-}
-
-
-@Controller
-@ResponseBody
-class HelloController {
-
-    @GetMapping("/me")
-    Map<String, String> hello(Principal principal) {
-        return Map.of("name", principal.getName());
     }
 
 }
@@ -44,14 +31,16 @@ class DogController {
     }
 
     @GetMapping("/dogs")
-    Collection<Dog> dogs() {
-        return this.repository.findAll();
+    Collection<Dog> dogs(Principal principal) {
+        System.out.println("looking up dogs for " + principal.getName() + ".");
+        return this.repository.findByOwner(principal.getName());
     }
-
 }
 
 interface DogRepository extends ListCrudRepository<Dog, Integer> {
+
+    Collection<Dog> findByOwner(String owner);
 }
 
-record Dog(@Id int id, String name, String description, String owner) {
+record Dog(@Id int id, String name, String owner, String description) {
 }

@@ -1,10 +1,4 @@
-server:
-  port: 8080
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/mydatabase
-    password: secret
-    username: myuser
   security:
     oauth2:
       authorizationserver:
@@ -24,3 +18,9 @@ spring:
               scopes:
                 - "openid"
                 - "profile"
+  application:
+    name: auth
+  datasource:
+    username: myuser
+    password: secret
+    url: jdbc:postgresql://localhost/mydatabase

@@ -11,9 +11,13 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.ott.OneTimeTokenGenerationSuccessHandler;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.sql.DataSource;
+import java.security.Principal;
+import java.util.Map;
 
 import static org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer.authorizationServer;
 
@@ -25,30 +29,24 @@ public class AuthApplication {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
+    SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
+        return security
                 .with(authorizationServer(), as -> as.oidc(Customizer.withDefaults()))
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults())
-                .webAuthn(w -> w
-                    .allowedOrigins("http://localhost:8080")
-                    .rpId("localhost")
-                    .rpName("Bootiful")
+                .webAuthn(wa -> wa
+                        .rpName("bootiful")
+                        .rpId("localhost")
+                        .allowedOrigins("http://localhost:8080")
                 )
                 .authorizeHttpRequests(a -> a.anyRequest().authenticated())
-                .oneTimeTokenLogin(ott -> ott.tokenGenerationSuccessHandler((OneTimeTokenGenerationSuccessHandler) (request, response, oneTimeToken) -> {
-                    response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE);
-                    response.getWriter().println("you've got console mail!");
-                    var url = "http://localhost:8080/login/ott?token=" + oneTimeToken.getTokenValue();
-                    System.out.println(url);
-                }))
+                .oneTimeTokenLogin(configurer -> configurer
+                        .tokenGenerationSuccessHandler((request, response, oneTimeToken) -> {
+                            response.getWriter().println("you've got console mail!");
+                            response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE);
+                            System.out.println("go to http://localhost:8080/login/ott?token=" + oneTimeToken.getTokenValue());
+                        }))
                 .build();
-    }
-
-
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
     @Bean
@@ -58,13 +56,28 @@ public class AuthApplication {
         return u;
     }
 
-/*    @Bean
-    InMemoryUserDetailsManager userDetailsManager(PasswordEncoder pw) {
-        return new InMemoryUserDetailsManager(
-                User.withUsername("rob").roles("USER", "ADMIN").password(pw.encode("pw")).build(),
-                User.withUsername("josh").roles("USER").password(pw.encode("pw")).build()
-        );
-    }*/
+    /*   @Bean
+       InMemoryUserDetailsManager inMemoryUserDetailsManager(PasswordEncoder pw) {
+           return new InMemoryUserDetailsManager(
+                   User.withUsername("josh").roles("USER").password(pw.encode("pw")).build(),
+                   User.withUsername("rob").roles("USER", "ADMIN").password(pw.encode("pw")).build()
+           );
+       }
+
+   */
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
 
 }
 
+@Controller
+@ResponseBody
+class HelloController {
+
+    @GetMapping("/")
+    Map<String, String> me(Principal principal) {
+        return Map.of("name", principal.getName());
+    }
+}
