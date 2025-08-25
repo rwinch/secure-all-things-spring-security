@@ -2,6 +2,9 @@
 
 docker compose up -d 
 sleep 5
+
+./dogs_db.sh
+
 cat `dirname $0`/legacy-schema.sql | PGPASSWORD=secret psql -U myuser -h localhost mydatabase
 
 # if you want to use the SQL then remember to run:
