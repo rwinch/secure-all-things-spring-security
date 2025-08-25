@@ -2,7 +2,7 @@
 
 with Spring Security lead Rob Winch and Spring Developer Advocate Josh Long
 
-[Slides]([https://docs.google.com/presentation/d/1mi6xGsGBq9PjxzOj1W9oEtFHBnfE61X8nrr5K_FcHLo/edit?usp=sharing](https://docs.google.com/presentation/d/1pKnWhq_WIuN2rMBasH_WgfSolB1UtaMy/edit?usp=sharing&ouid=102785165169597247317&rtpof=true&sd=true))
+[Slides](https://docs.google.com/presentation/d/1pKnWhq_WIuN2rMBasH_WgfSolB1UtaMy/edit?usp=sharing&ouid=102785165169597247317&rtpof=true&sd=true)
 
 ## preflight 
 * go to safari and delete all the old passkeys. TAN: why are passkeys for the entire OS in their bloody browser?
